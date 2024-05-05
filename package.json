@@ -31,6 +31,7 @@
     "babylonjs-viewer": "^7.5.0",
     "cjs-loader": "^0.1.0",
     "electron-squirrel-startup": "^1.0.0",
+    "firebase": "^10.11.1",
     "typescript": "^5.4.5"
   }
 }

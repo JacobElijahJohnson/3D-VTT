@@ -1,6 +1,36 @@
 const { app, BrowserWindow, Menu, dialog, ipcMain } = require('electron');
 const fs = require('fs');
 const path = require('path');
+const firebase = require('firebase/app');
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCr7faYf3beXGziSVYEMXq3KsqZJ36v8Zg",
+  authDomain: "d-vtt-e6c9b.firebaseapp.com",
+  projectId: "d-vtt-e6c9b",
+  storageBucket: "d-vtt-e6c9b.appspot.com",
+  messagingSenderId: "362323587079",
+  appId: "1:362323587079:web:ae13e1ffb470d54b09faa2",
+  measurementId: "G-GT9Z555NCJ"
+};
+
+// Initialize Firebase
+const newFire = firebase.initializeApp(firebaseConfig);
+const firestore = firebase.firestore();
+
+const servers = {
+  iceServers: [
+    {
+      urls: ['stun1.l.google.com:19302', 'stun2.l.google.com:19302']
+    },
+  ],
+  iceCandidatePoolSize: 10,
+};
+
+let pc = new RTCPeerConnection(servers);
+const dc = pc.createDataChannel();
+let localStream = null;
+let remoteStream = null;
+
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require('electron-squirrel-startup')) {
@@ -46,8 +76,14 @@ const createWindow = () => {
               console.log(err);
             })
           }
+        },
+        {
+          label: 'Connect',
+          click: () =>{
+
+          }
         }
-      ]
+      ],
     }
   ])
 

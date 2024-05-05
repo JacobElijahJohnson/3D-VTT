@@ -1,5 +1,6 @@
-const { app, BrowserWindow } = require('electron');
-const path = require('node:path');
+const { app, BrowserWindow, Menu, dialog, ipcMain } = require('electron');
+const fs = require('fs');
+const path = require('path');
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require('electron-squirrel-startup')) {
@@ -18,6 +19,39 @@ const createWindow = () => {
     },
   });
 
+  const menu = Menu.buildFromTemplate([
+    {
+      label: "File",
+      submenu: [
+        {
+          label: "Save File",
+          click: () => {
+            mainWindow.webContents.send('save');
+          }
+        },
+        {
+          label: "Open File",
+          click: () => {
+            dialog.showOpenDialog( options = { 
+              defaultPath: path.join(app.getAppPath(), 'src\\Maps'),
+              filters: [
+                {
+                  name: 'babylon',
+                  extensions: ['babylon']}
+              ]
+            }).then((fileName) => {
+              console.log(fileName)
+              mainWindow.webContents.send('load', fileName.filePaths[0]);
+            }).catch(err => {
+              console.log(err);
+            })
+          }
+        }
+      ]
+    }
+  ])
+
+  Menu.setApplicationMenu(menu)
   // and load the index.html of the app.
   mainWindow.loadFile(path.join(__dirname, 'index.html'));
 
@@ -48,6 +82,29 @@ app.on('window-all-closed', () => {
     app.quit();
   }
 });
+
+ipcMain.on("saveFile", (event, data) => {
+  const blob = new Blob([data], { type: "octet/stream" });
+
+  dialog.showSaveDialog( options = { 
+    defaultPath: path.join(app.getAppPath(), 'src\\Maps'),
+    filters: [
+      {
+        name: 'babylon',
+        extensions: ['babylon']}
+    ]
+  }).then((fileName) => {
+    const test = async () => {
+      const blobBuffer = Buffer.from(await blob.arrayBuffer())
+      if(!fileName.canceled){fs.writeFile(fileName.filePath.toString(), blobBuffer, 'utf8', (err) => {
+        dialog.showErrorBox*('Save failed');
+      })}
+    }
+    test();
+  }).catch(err => {
+    console.log(err);
+  })
+})
 
 // In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and import them here.
